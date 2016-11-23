@@ -1,0 +1,198 @@
+CREATE DATABASE "Work"
+  WITH OWNER = postgres
+       ENCODING = 'UTF8'
+       TABLESPACE = pg_default
+       LC_COLLATE = 'English_United States.1252'
+       LC_CTYPE = 'English_United States.1252'
+       CONNECTION LIMIT = -1;
+
+
+
+
+
+------------------------------------------------------------------------------------------------------
+
+
+CREATE SCHEMA public
+  AUTHORIZATION postgres;
+
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
+COMMENT ON SCHEMA public
+  IS 'standard public schema';
+
+
+------------------------------------------------------------------------------------------------------
+
+
+
+CREATE TABLE public.army
+(
+  row_idnumber uuid,
+  race_idnumber character varying(255),
+  building_idnumber character varying(255),
+  army character varying(255),
+  army_short character varying(255),
+  height integer,
+  width integer,
+  view_range integer,
+  cost_type1 integer,
+  cost_type2 integer,
+  cost_type3 integer,
+  hitpoints integer,
+  shield integer,
+  speed integer,
+  attackrange integer,
+  attacktype integer,
+  attacktarget integer,
+  cantransport integer,
+  transportmax integer,
+  armyweight integer,
+  armytype integer,
+  image character varying(255),
+  created_by character varying(255),
+  create_date timestamp without time zone,
+  updated_by character varying(255),
+  updated_date timestamp without time zone,
+  status integer
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.army
+  OWNER TO postgres;
+
+
+
+
+CREATE TABLE public.buildings
+(
+  row_idnumber uuid,
+  race_idnumber character varying(255),
+  building character varying(255),
+  bldng_short character varying(255),
+  height integer,
+  width integer,
+  view_range integer,
+  cost_type1 integer,
+  cost_type2 integer,
+  cost_type3 integer,
+  hitpoints integer,
+  shield integer,
+  image character varying(255),
+  created_by character varying(255),
+  create_date timestamp without time zone,
+  updated_by character varying(255),
+  updated_date timestamp without time zone,
+  status integer
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.buildings
+  OWNER TO postgres;
+
+
+
+
+
+-- Table: public.maps
+
+-- DROP TABLE public.maps;
+
+CREATE TABLE public.maps
+(
+  row_idnumber uuid,
+  map character varying(255),
+  mp_short character varying(255),
+  map_size character varying(255),
+  created_by character varying(255),
+  create_date timestamp without time zone,
+  updated_by character varying(255),
+  updated_date timestamp without time zone,
+  status integer
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.maps
+  OWNER TO postgres;
+
+
+
+------------------------------------------------------------------------------------------------------
+
+
+
+CREATE OR REPLACE FUNCTION public.maintain_map(
+    v_row_idnumber uuid,
+    v_map character varying,
+    v_mp_short character varying,
+    v_map_size character varying,
+    v_username character varying,
+    v_status integer)
+  RETURNS uuid AS
+$BODY$
+
+
+declare map_countr int;
+
+
+
+
+begin
+ 
+ if (v_status > 0)
+ then
+ begin
+	map_countr := (select count(*) from public.maps where row_idnumber = v_row_idnumber);
+	if(map_countr = 1)
+		then 
+		begin
+			
+		UPDATE public.maps
+		SET map = v_map,
+		mp_short = v_mp_short, 
+		map_size = v_map_size, 
+		               
+                updated_by=  v_username, 
+                updated_date= getdate(),
+                status=v_status
+                WHERE "row_idnumber" = v_row_idnumber;
+			
+			
+		end;
+	elsif (map_countr = 0)
+		then
+		begin
+
+		INSERT INTO public.maps(
+		         row_idnumber,        map,          mp_short,           map_size,           created_by, 
+		         create_date,         updated_by,   updated_date,       status)
+		VALUES (
+			 v_row_idnumber,      v_map,        v_mp_short,         v_map_size,         v_username, 
+		         getdate(),           v_username,   getdate(),          v_status);
+	
+
+		end;
+
+		
+	end if;
+
+end;
+elseif (v_status = -1)
+then begin
+delete from public.maps where row_idnumber = v_row_idnumber;
+
+end;
+end if;
+
+
+
+return v_row_idnumber;
+end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION public.maintain_map(uuid, character varying, character varying, character varying, character varying, integer)
+  OWNER TO postgres;
