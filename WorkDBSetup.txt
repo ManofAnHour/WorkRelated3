@@ -24,7 +24,25 @@ COMMENT ON SCHEMA public
 
 ------------------------------------------------------------------------------------------------------
 
-
+CREATE TABLE public.account
+(
+  row_idnumber uuid,
+  username character varying(255),
+  password character varying(255),
+  first character varying(255),
+  last character varying(255),
+  created_by character varying(255),
+  create_date timestamp without time zone,
+  updated_by character varying(255),
+  updated_date timestamp without time zone,
+  status integer
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.account
+  OWNER TO postgres;
+  
 
 CREATE TABLE public.army
 (
@@ -118,6 +136,69 @@ WITH (
 ALTER TABLE public.maps
   OWNER TO postgres;
 
+CREATE TABLE public.playtable
+(
+  row_idnumber uuid,
+  session_idnumber uuid,
+  map_idnumber uuid,
+  account_idnumber uuid,
+  unit_idnumber uuid,
+  hitpoints integer,
+  maxhitpoints integer,
+  shieldpoints integer,
+  maxshieldpoints integer,
+  currentcapicity integer,
+  location_x integer,
+  location_y integer,
+  created_by character varying(255),
+  create_date timestamp without time zone,
+  updated_by character varying(255),
+  updated_date timestamp without time zone,
+  status integer
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.playtable
+  OWNER TO postgres;
+
+
+CREATE TABLE public.race
+(
+  row_idnumber uuid,
+  race character varying(255),
+  rc_srt character varying(255),
+  created_by character varying(255),
+  create_date timestamp without time zone,
+  updated_by character varying(255),
+  updated_date timestamp without time zone,
+  status integer
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.race
+  OWNER TO postgres;
+
+
+
+
+CREATE TABLE public.session
+(
+  row_idnumber uuid,
+  map_idnumber uuid,
+  winner_idnumber uuid,
+  created_by character varying(255),
+  create_date timestamp without time zone,
+  updated_by character varying(255),
+  updated_date timestamp without time zone,
+  status integer
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.session
+  OWNER TO postgres;
 
 
 ------------------------------------------------------------------------------------------------------
